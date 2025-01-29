@@ -10,13 +10,14 @@
         textarea { width: 100%; height: 100px; margin-bottom: 10px; }
         button { padding: 10px; margin-top: 10px; cursor: pointer; }
         .output { margin-top: 20px; font-weight: bold; white-space: pre-line; }
+        .color-list { display: grid; grid-template-columns: repeat(2, 1fr); text-align: left; }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Warcraft III Color Randomizer</h2>
-        <p>Enter available colors (one per line):</p>
-        <textarea id="colors"></textarea>
+        <p>Select available colors:</p>
+        <div class="color-list" id="colorList"></div>
         <p>Enter player names (one per line):</p>
         <textarea id="players"></textarea>
         <button onclick="randomizeAssignments()">Randomize</button>
@@ -26,22 +27,37 @@
     </div>
 
     <script>
+        const colors = [
+            "Red", "Blue", "Teal", "Purple", "Yellow", "Orange", "Green", "Pink",
+            "Gray", "Light Blue", "Dark Green", "Brown", "Maroon", "Navy", "Turquoise", "Violet",
+            "Wheat", "Peach", "Mint", "Lavender", "Coal", "Snow", "Emerald", "Peanut", "Black"
+        ];
+        
+        function loadColors() {
+            const colorList = document.getElementById("colorList");
+            colors.forEach(color => {
+                let label = document.createElement("label");
+                label.innerHTML = `<input type="checkbox" value="${color}"> ${color}`;
+                colorList.appendChild(label);
+            });
+        }
+        
         function randomizeAssignments() {
-            let colors = document.getElementById("colors").value.trim().split("\n").filter(c => c.trim() !== "");
+            let selectedColors = [...document.querySelectorAll('#colorList input:checked')].map(cb => cb.value);
             let players = document.getElementById("players").value.trim().split("\n").filter(p => p.trim() !== "");
             
-            if (colors.length !== players.length) {
-                alert("Error: The number of colors must match the number of players.");
+            if (selectedColors.length !== players.length) {
+                alert("Error: The number of selected colors must match the number of players.");
                 return;
             }
             
             // Shuffle both arrays randomly
-            colors = colors.sort(() => Math.random() - 0.5);
+            selectedColors = selectedColors.sort(() => Math.random() - 0.5);
             players = players.sort(() => Math.random() - 0.5);
             
             let output = "";
-            for (let i = 0; i < colors.length; i++) {
-                output += `🎨 **${colors[i]}** → ${players[i]}\n`;
+            for (let i = 0; i < selectedColors.length; i++) {
+                output += `🎨 **${selectedColors[i]}** → ${players[i]}\n`;
             }
             
             document.getElementById("output").innerText = output;
@@ -55,6 +71,8 @@
                 console.error("Failed to copy: ", err);
             });
         }
+
+        window.onload = loadColors;
     </script>
 </body>
 </html>

@@ -57,7 +57,7 @@
             
             let output = "";
             for (let i = 0; i < selectedColors.length; i++) {
-                output += `🎨 **${selectedColors[i]}** → ${players[i]}\n`;
+                output += `${selectedColors[i]} → ${players[i]}\n`;
             }
             
             document.getElementById("output").innerText = output;

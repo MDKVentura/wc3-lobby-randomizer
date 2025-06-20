@@ -80,7 +80,6 @@
         const original = button.innerText;
         button.innerText = "✅";
         button.style.opacity = "1";
-
         setTimeout(() => {
           button.innerText = original;
         }, 1000);
@@ -103,39 +102,48 @@
       const outputDiv = document.getElementById("colorSwapOutput");
       outputDiv.innerHTML = "";
 
+      const swapLines = [];
+      const noSwapLines = [];
+
       while (used.size < shuffled.length) {
         const available = shuffled.filter(n => !used.has(n));
 
         if (available.length === 1) {
           const n = available[0];
           used.add(n);
-          addSwapLine(`no swap ${n}`);
+          noSwapLines.push(`no swap ${n}`);
         } else {
           const n1 = available[0];
           const n2 = available[1];
-
           const doSelf = Math.random() < 0.25;
+
           if (doSelf) {
             used.add(n1);
-            addSwapLine(`no swap ${n1}`);
+            noSwapLines.push(`no swap ${n1}`);
           } else {
             used.add(n1);
             used.add(n2);
-            addSwapLine(`!swap ${n1} ${n2}`);
+            swapLines.push(`!swap ${n1} ${n2}`);
           }
         }
       }
 
-      function addSwapLine(line) {
+      swapLines.forEach(line => {
         const div = document.createElement("div");
         div.className = "swap-line";
-        const id = "btn_" + Math.random().toString(36).substr(2, 5);
         div.innerHTML = `
           <span class="swap-text">${line}</span>
-          <button id="${id}" class="copy-button" onclick="copyLine('${line}', this)">📋</button>
+          <button class="copy-button" onclick="copyLine('${line}', this)">📋</button>
         `;
         outputDiv.appendChild(div);
-      }
+      });
+
+      noSwapLines.forEach(line => {
+        const div = document.createElement("div");
+        div.className = "swap-line";
+        div.innerHTML = `<span class="swap-text">${line}</span>`;
+        outputDiv.appendChild(div);
+      });
     }
 
     function randomizeSwaps() {
@@ -150,28 +158,33 @@
       let outputDiv = document.getElementById("swapOutput");
       outputDiv.innerHTML = "";
 
+      const swapLines = [];
+      const noSwapLines = [];
+
       while (used.size < players.length) {
         const available = players.filter(p => !used.has(p));
+
         if (available.length === 1) {
           const p = available[0];
           used.add(p);
-          addSwapLine(`no swap ${p}`);
+          noSwapLines.push(`no swap ${p}`);
         } else {
           const p1 = available[0];
           const p2 = available[1];
           const doSelfSwap = Math.random() < 0.25;
+
           if (doSelfSwap) {
             used.add(p1);
-            addSwapLine(`no swap ${p1}`);
+            noSwapLines.push(`no swap ${p1}`);
           } else {
             used.add(p1);
             used.add(p2);
-            addSwapLine(`!swap ${p1} ${p2}`);
+            swapLines.push(`!swap ${p1} ${p2}`);
           }
         }
       }
 
-      function addSwapLine(line) {
+      swapLines.forEach(line => {
         const div = document.createElement("div");
         div.className = "swap-line";
         div.innerHTML = `
@@ -179,7 +192,14 @@
           <button class="copy-button" onclick="copyLine('${line}', this)">📋</button>
         `;
         outputDiv.appendChild(div);
-      }
+      });
+
+      noSwapLines.forEach(line => {
+        const div = document.createElement("div");
+        div.className = "swap-line";
+        div.innerHTML = `<span class="swap-text">${line}</span>`;
+        outputDiv.appendChild(div);
+      });
     }
 
     window.onload = loadColors;

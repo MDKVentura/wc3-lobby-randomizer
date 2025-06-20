@@ -1,146 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warcraft III Color Randomizer</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
-        .container { max-width: 500px; margin: auto; }
-        textarea { width: 100%; height: 100px; margin-bottom: 10px; }
-        button { padding: 10px; margin-top: 10px; cursor: pointer; }
-        .output { margin-top: 20px; font-weight: bold; white-space: pre-line; }
-        .color-list { display: grid; grid-template-columns: repeat(2, 1fr); text-align: left; }
-        .swap-line { display: flex; align-items: center; justify-content: space-between; margin: 5px 0; }
-        .swap-text { flex-grow: 1; text-align: left; }
-        .copy-button {
-            padding: 5px 8px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Warcraft III Color Randomizer</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+    .container { max-width: 500px; margin: auto; }
+    textarea { width: 100%; height: 100px; margin-bottom: 10px; }
+    button { padding: 10px; margin-top: 10px; cursor: pointer; }
+    .output { margin-top: 20px; font-weight: bold; white-space: pre-line; }
+    .color-list { display: grid; grid-template-columns: repeat(2, 1fr); text-align: left; }
+    .swap-line { display: flex; align-items: center; justify-content: space-between; margin: 5px 0; }
+    .swap-text { flex-grow: 1; text-align: left; }
+    .copy-button {
+      padding: 5px 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: opacity 0.3s ease;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Warcraft III Color Randomizer</h2>
-        <p>Select available colors:</p>
-        <div class="color-list" id="colorList"></div>
-        <p>Enter player names (one per line):</p>
-        <textarea id="players"></textarea>
-        <button onclick="randomizeAssignments()">Randomize</button>
-        <button onclick="copyToClipboard()">Copy to Clipboard</button>
-        <h3>Assignments:</h3>
-        <div id="output" class="output"></div>
+  <div class="container">
+    <h2>Warcraft III Color Swap Generator</h2>
 
-        <hr>
-        <h3>Random Swaps:</h3>
-        <p>Enter player names (one per line):</p>
-        <textarea id="swapPlayers"></textarea>
-        <button onclick="randomizeSwaps()">Randomize Swaps</button>
-        <div id="swapOutput" class="output"></div>
-    </div>
+    <p>Select available colors:</p>
+    <div class="color-list" id="colorList"></div>
+    <button onclick="generateColorSwaps()">Randomize Color Swaps</button>
+    <div id="colorSwapOutput" class="output"></div>
 
-    <script>
-        const colors = [
-            "Red", "Blue", "Teal", "Purple", "Yellow", "Orange", "Green", "Pink",
-            "Gray", "Light Blue", "Dark Green", "Brown", "Maroon", "Navy", "Turquoise", "Violet",
-            "Wheat", "Peach", "Mint", "Lavender", "Coal", "Snow", "Emerald", "Peanut", "Black"
-        ];
-        
-        function loadColors() {
-            const colorList = document.getElementById("colorList");
-            colors.forEach(color => {
-                let label = document.createElement("label");
-                label.innerHTML = `<input type="checkbox" value="${color}"> ${color}`;
-                colorList.appendChild(label);
-            });
+    <hr>
+    <h3>Random Player Swaps:</h3>
+    <p>Enter player names (one per line):</p>
+    <textarea id="swapPlayers"></textarea>
+    <button onclick="randomizeSwaps()">Randomize Swaps</button>
+    <div id="swapOutput" class="output"></div>
+  </div>
+
+  <script>
+    const colors = [
+      { name: "Red", number: 1 },
+      { name: "Blue", number: 2 },
+      { name: "Teal", number: 3 },
+      { name: "Purple", number: 4 },
+      { name: "Yellow", number: 5 },
+      { name: "Orange", number: 6 },
+      { name: "Green", number: 7 },
+      { name: "Pink", number: 8 },
+      { name: "Gray", number: 9 },
+      { name: "Light Blue", number: 10 },
+      { name: "Dark Green", number: 11 },
+      { name: "Brown", number: 12 },
+      { name: "Maroon", number: 13 },
+      { name: "Navy", number: 14 },
+      { name: "Turquoise", number: 15 },
+      { name: "Violet", number: 16 },
+      { name: "Wheat", number: 17 },
+      { name: "Peach", number: 18 },
+      { name: "Mint", number: 19 },
+      { name: "Lavender", number: 20 },
+      { name: "Coal", number: 21 },
+      { name: "Snow", number: 22 },
+      { name: "Emerald", number: 23 },
+      { name: "Peanut", number: 24 }
+    ];
+
+    function loadColors() {
+      const colorList = document.getElementById("colorList");
+      colors.forEach(color => {
+        let label = document.createElement("label");
+        label.innerHTML = `<input type="checkbox" value="${color.number}"> ${color.name}`;
+        colorList.appendChild(label);
+      });
+    }
+
+    function copyLine(text, button) {
+      navigator.clipboard.writeText(text).then(() => {
+        const original = button.innerText;
+        button.innerText = "✅";
+        button.style.opacity = "1";
+
+        setTimeout(() => {
+          button.innerText = original;
+        }, 1000);
+      }).catch(err => {
+        console.error("Copy failed: ", err);
+      });
+    }
+
+    function generateColorSwaps() {
+      const selected = [...document.querySelectorAll('#colorList input:checked')]
+        .map(cb => parseInt(cb.value));
+      
+      if (selected.length < 1) {
+        alert("Select at least one color.");
+        return;
+      }
+
+      const shuffled = selected.sort(() => Math.random() - 0.5);
+      const used = new Set();
+      const outputDiv = document.getElementById("colorSwapOutput");
+      outputDiv.innerHTML = "";
+
+      while (used.size < shuffled.length) {
+        const available = shuffled.filter(n => !used.has(n));
+
+        if (available.length === 1) {
+          const n = available[0];
+          used.add(n);
+          addSwapLine(`no swap ${n}`);
+        } else {
+          const n1 = available[0];
+          const n2 = available[1];
+
+          const doSelf = Math.random() < 0.25;
+          if (doSelf) {
+            used.add(n1);
+            addSwapLine(`no swap ${n1}`);
+          } else {
+            used.add(n1);
+            used.add(n2);
+            addSwapLine(`!swap ${n1} ${n2}`);
+          }
         }
-        
-        function randomizeAssignments() {
-            let selectedColors = [...document.querySelectorAll('#colorList input:checked')].map(cb => cb.value);
-            let players = document.getElementById("players").value.trim().split("\n").filter(p => p.trim() !== "");
-            
-            if (selectedColors.length !== players.length) {
-                alert("Error: The number of selected colors must match the number of players.");
-                return;
-            }
-            
-            selectedColors = selectedColors.sort(() => Math.random() - 0.5);
-            players = players.sort(() => Math.random() - 0.5);
-            
-            let output = "";
-            for (let i = 0; i < selectedColors.length; i++) {
-                output += `${selectedColors[i]} → ${players[i]}\n`;
-            }
-            
-            document.getElementById("output").innerText = output;
+      }
+
+      function addSwapLine(line) {
+        const div = document.createElement("div");
+        div.className = "swap-line";
+        const id = "btn_" + Math.random().toString(36).substr(2, 5);
+        div.innerHTML = `
+          <span class="swap-text">${line}</span>
+          <button id="${id}" class="copy-button" onclick="copyLine('${line}', this)">📋</button>
+        `;
+        outputDiv.appendChild(div);
+      }
+    }
+
+    function randomizeSwaps() {
+      let players = document.getElementById("swapPlayers").value.trim().split("\n").filter(p => p.trim() !== "");
+      if (players.length < 1) {
+        alert("Enter at least one player.");
+        return;
+      }
+
+      players = players.sort(() => Math.random() - 0.5);
+      const used = new Set();
+      let outputDiv = document.getElementById("swapOutput");
+      outputDiv.innerHTML = "";
+
+      while (used.size < players.length) {
+        const available = players.filter(p => !used.has(p));
+        if (available.length === 1) {
+          const p = available[0];
+          used.add(p);
+          addSwapLine(`no swap ${p}`);
+        } else {
+          const p1 = available[0];
+          const p2 = available[1];
+          const doSelfSwap = Math.random() < 0.25;
+          if (doSelfSwap) {
+            used.add(p1);
+            addSwapLine(`no swap ${p1}`);
+          } else {
+            used.add(p1);
+            used.add(p2);
+            addSwapLine(`!swap ${p1} ${p2}`);
+          }
         }
+      }
 
-        function copyToClipboard() {
-            let outputText = document.getElementById("output").innerText;
-            navigator.clipboard.writeText(outputText).then(() => {
-                alert("Copied to clipboard!");
-            }).catch(err => {
-                console.error("Failed to copy: ", err);
-            });
-        }
+      function addSwapLine(line) {
+        const div = document.createElement("div");
+        div.className = "swap-line";
+        div.innerHTML = `
+          <span class="swap-text">${line}</span>
+          <button class="copy-button" onclick="copyLine('${line}', this)">📋</button>
+        `;
+        outputDiv.appendChild(div);
+      }
+    }
 
-        function copyLine(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert(`Copied: ${text}`);
-            }).catch(err => {
-                console.error("Copy failed: ", err);
-            });
-        }
-
-        function randomizeSwaps() {
-            let players = document.getElementById("swapPlayers").value.trim().split("\n").filter(p => p.trim() !== "");
-
-            if (players.length < 1) {
-                alert("Enter at least one player.");
-                return;
-            }
-
-            players = players.sort(() => Math.random() - 0.5);
-            const used = new Set();
-            let outputDiv = document.getElementById("swapOutput");
-            outputDiv.innerHTML = "";
-
-            while (used.size < players.length) {
-                const available = players.filter(p => !used.has(p));
-
-                if (available.length === 1) {
-                    const p = available[0];
-                    used.add(p);
-                    addSwapLine(`no swap ${p}`);
-                } else {
-                    const p1 = available[0];
-                    const p2 = available[1];
-
-                    const doSelfSwap = Math.random() < 0.25;
-                    if (doSelfSwap) {
-                        used.add(p1);
-                        addSwapLine(`no swap ${p1}`);
-                    } else {
-                        used.add(p1);
-                        used.add(p2);
-                        addSwapLine(`!swap ${p1} ${p2}`);
-                    }
-                }
-            }
-
-            function addSwapLine(line) {
-                const lineDiv = document.createElement("div");
-                lineDiv.className = "swap-line";
-                lineDiv.innerHTML = `
-                    <span class="swap-text">${line}</span>
-                    <button class="copy-button" onclick="copyLine('${line}')">📋</button>
-                `;
-                outputDiv.appendChild(lineDiv);
-            }
-        }
-
-        window.onload = loadColors;
-    </script>
+    window.onload = loadColors;
+  </script>
 </body>
 </html>

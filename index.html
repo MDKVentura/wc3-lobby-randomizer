@@ -102,24 +102,34 @@
             }
 
             players = players.sort(() => Math.random() - 0.5);
-
+            const used = new Set();
             let outputDiv = document.getElementById("swapOutput");
-            outputDiv.innerHTML = ""; // Clear previous output
+            outputDiv.innerHTML = "";
 
-            for (let i = 0; i < players.length - 1; i += 2) {
-                const line = `!swap ${players[i]} ${players[i + 1]}`;
-                const lineDiv = document.createElement("div");
-                lineDiv.className = "swap-line";
-                lineDiv.innerHTML = `
-                    <span class="swap-text">${line}</span>
-                    <button class="copy-button" onclick="copyLine('${line}')">📋</button>
-                `;
-                outputDiv.appendChild(lineDiv);
+            while (used.size < players.length) {
+                const available = players.filter(p => !used.has(p));
+
+                if (available.length === 1) {
+                    const p = available[0];
+                    used.add(p);
+                    addSwapLine(`!swap ${p} ${p}`);
+                } else {
+                    const p1 = available[0];
+                    const p2 = available[1];
+
+                    const doSelfSwap = Math.random() < 0.25;
+                    if (doSelfSwap) {
+                        used.add(p1);
+                        addSwapLine(`!swap ${p1} ${p1}`);
+                    } else {
+                        used.add(p1);
+                        used.add(p2);
+                        addSwapLine(`!swap ${p1} ${p2}`);
+                    }
+                }
             }
 
-            if (players.length % 2 === 1) {
-                const last = players[players.length - 1];
-                const line = `!swap ${last} ${last}`;
+            function addSwapLine(line) {
                 const lineDiv = document.createElement("div");
                 lineDiv.className = "swap-line";
                 lineDiv.innerHTML = `

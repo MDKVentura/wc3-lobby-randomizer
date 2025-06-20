@@ -11,6 +11,13 @@
         button { padding: 10px; margin-top: 10px; cursor: pointer; }
         .output { margin-top: 20px; font-weight: bold; white-space: pre-line; }
         .color-list { display: grid; grid-template-columns: repeat(2, 1fr); text-align: left; }
+        .swap-line { display: flex; align-items: center; justify-content: space-between; margin: 5px 0; }
+        .swap-text { flex-grow: 1; text-align: left; }
+        .copy-button {
+            padding: 5px 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -78,6 +85,14 @@
             });
         }
 
+        function copyLine(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert(`Copied: ${text}`);
+            }).catch(err => {
+                console.error("Copy failed: ", err);
+            });
+        }
+
         function randomizeSwaps() {
             let players = document.getElementById("swapPlayers").value.trim().split("\n").filter(p => p.trim() !== "");
 
@@ -88,17 +103,31 @@
 
             players = players.sort(() => Math.random() - 0.5);
 
-            let output = "";
+            let outputDiv = document.getElementById("swapOutput");
+            outputDiv.innerHTML = ""; // Clear previous output
+
             for (let i = 0; i < players.length - 1; i += 2) {
-                output += `!swap ${players[i]} ${players[i + 1]}\n`;
+                const line = `!swap ${players[i]} ${players[i + 1]}`;
+                const lineDiv = document.createElement("div");
+                lineDiv.className = "swap-line";
+                lineDiv.innerHTML = `
+                    <span class="swap-text">${line}</span>
+                    <button class="copy-button" onclick="copyLine('${line}')">📋</button>
+                `;
+                outputDiv.appendChild(lineDiv);
             }
 
             if (players.length % 2 === 1) {
                 const last = players[players.length - 1];
-                output += `!swap ${last} ${last}`;
+                const line = `!swap ${last} ${last}`;
+                const lineDiv = document.createElement("div");
+                lineDiv.className = "swap-line";
+                lineDiv.innerHTML = `
+                    <span class="swap-text">${line}</span>
+                    <button class="copy-button" onclick="copyLine('${line}')">📋</button>
+                `;
+                outputDiv.appendChild(lineDiv);
             }
-
-            document.getElementById("swapOutput").innerText = output;
         }
 
         window.onload = loadColors;

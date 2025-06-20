@@ -112,7 +112,7 @@
                 if (available.length === 1) {
                     const p = available[0];
                     used.add(p);
-                    addSwapLine(`!swap ${p} ${p}`);
+                    addSwapLine(`no swap ${p}`);
                 } else {
                     const p1 = available[0];
                     const p2 = available[1];
@@ -120,7 +120,7 @@
                     const doSelfSwap = Math.random() < 0.25;
                     if (doSelfSwap) {
                         used.add(p1);
-                        addSwapLine(`!swap ${p1} ${p1}`);
+                        addSwapLine(`no swap ${p1}`);
                     } else {
                         used.add(p1);
                         used.add(p2);
